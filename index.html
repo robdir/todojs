@@ -7,6 +7,7 @@
     body {
       font-family: Helvetica, Arial, sans-serif;
       font-size: 18px;
+      background-color: WhiteSmoke;
     }
 
     .container {
@@ -22,6 +23,10 @@
 
     form {
       padding: 0 0 20px;
+    }
+
+    form input {
+      background-color: WhiteSmoke;
     }
 
     input#new-todo {
@@ -78,9 +83,11 @@
 
 <body>
   <div class="container">
-    <h1>TodoList</h1>
+    <h1>Let's keep organised!</h1>
 
-    <form>
+    <!-- create listener on form so input can be caught and used in a js func -->
+
+    <form onSubmit="submitTodo(); return false">
       <input type="text" id="new-todo" placeholder="What needs to be done?">
     </form>
 
@@ -98,20 +105,85 @@
       Todo: <span id="todo-count">1</span> •
       Done: <span id="completed-count">0</span> •
       Total: <span id="total-count">1</span>
+
+      <!-- Clean up completed items -->
+      <a href="#" onClick="cleanUpDoneTodos(); return false">Clean up</a>
     </div>
   </div>
 
   <script>
 
+  function cleanUpDoneTodos() {
+    var list = document.getElementById("todolist");
+    var doneItems = document.getElementsByClassName("completed");
+
+    // Reverse loop through completed items so they can be removed
+    // without changing the index
+    for (var i = doneItems.length; i > 0; i--) {
+      list.removeChild(doneItems[i-1]);
+    }
+
+    updateCounters();
+  }
+
+  function submitTodo() {
+    var inputField = document.getElementById("new-todo");
+    var newTodoTitle = inputField.value;
+    createTodo(newTodoTitle);
+
+    // reset the value of the inputField to make it empty, ready for more input
+    inputField.value = null;
+
+    updateCounters();
+  }
+
+
+  function createTodo(title) {
+    // create a list item (li)
+    var listItem = document.createElement("li");
+    listItem.className = "todo";
+
+    // create a checkbox, add it to the new <li>
+    var checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.id = " todo-" + nextTodoId();
+    checkbox.checked = false;
+
+    // assign the toggleDone function on the checkbox's onchange event
+    checkbox.onchange = toggleDone.bind(checkbox);
+    listItem.appendChild(checkbox);
+
+    // create some whitespace between checkbox and label
+    var space = document.createTextNode(" ");
+    listItem.appendChild(space);
+
+    // create a label that holds the title and add it to the <li>
+    var label = document.createElement("label");
+    label.htmlFor = checkbox.id;
+    label.innerHTML = title;
+    listItem.appendChild(label);
+
+    // the list!
+    var list = document.getElementById("todolist")
+    list.appendChild(listItem);
+
+    updateCounters();
+  }
+
+  function nextTodoId() {
+    return document.getElementsByClassName("todo").length + 1
+
+  }
+
   function toggleDone() {
-  var checkbox = this;
+    var checkbox = this;
 
   // check the checked status of the checkbox
-  if (checkbox.checked) {
-    // the "completed" class is set on the parent element, the <li>
-    checkbox.parentElement.className = "todo completed";
-  } else {
-    checkbox.parentElement.className = "todo";
+    if (checkbox.checked) {
+      // the "completed" class is set on the parent element, the <li>
+      checkbox.parentElement.className = "todo completed";
+      }  else {
+        checkbox.parentElement.className = "todo";
   }
   updateCounters();
 }
